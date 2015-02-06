@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT([quetzal], [0.1], [michal.grochmal@gmail.com])
+AC_INIT([quetzal], [0.1], [michal.jan.grochmal@gmail.com])
 # The -Wall is for automake not for the compiler
 AM_INIT_AUTOMAKE([-Wall])
 AM_SILENT_RULES([no])
