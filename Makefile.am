@@ -1,3 +1,5 @@
-SUBDIRS = libquetzal src
+ACLOCAL_AMFLAGS = -I m4
+
+SUBDIRS = libquetzal
 EXTRA_DIST = README.md
 

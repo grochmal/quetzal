@@ -1,0 +1,22 @@
+# vim and emacs stuff
+*.swp
+*~
+
+# autoconf stuff
+autom4te.cache/
+m4/
+aclocal.m4
+compile
+config.guess
+config.sub
+configure
+install-sh
+ltmain.sh
+missing
+
+# templates
+Makefile.in
+Makefile
+config.h.in
+config.h
+

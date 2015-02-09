@@ -4,38 +4,138 @@
  * This file is distributed under the terms of GNU GPL v3
  */
 
+#include <quetzal.h>
+
 #include <conf.h>
 
-#include <math.h>
+#include <stdlib.h>  /* NULL */
+#include <math.h>    /* sqrt */
 
-struct quetzal_classi_str {
-	unsigned char        * name;
-	struct point         * points;
-	struct quetzal_class * next;
+struct quetzal_class_str {
+	unsigned char            * name;
+	struct quetzal_point_str * inst;
+	struct quetzal_class_str * next;
 };
 struct quetzal_point_str {
-	struct dimension * dims;
-	struct point     * next;
+	unsigned int               max;
+	struct quetzal_pdims_str * points[POINT_CACHE];
+	struct quetzal_point_str * next;
 };
-struct dimension {
-	double             position;
-	struct dimension * next;
+struct quetzal_ptdim_str {
+	unsigned int               max;
+	dim_prec_t                 position[DIM_CACHE];
+	struct quetzal_ptdim_str * next;
 }
 /* typedef struct quetzal_class_str quetzal_class; */
 /* typedef struct quetzal_point_str quetzal_point; */
+/* typedef struct quetzal_ptdim_str quetzal_ptdim; */
 
-static double
-distance (quetzal_point * left, quetzal_point * right) {
-	struct dimension * diml;
-	struct dimension * dimr;
-	double raw = 0.0;
-	double sum = 0.0;
+/**
+ * quetzal_num_ptdim - returns the number of dimensions in a quetzal_ptdim
+ *
+ * output parameters (value undefined if execution failed):
+ *   offset - will be set to the number of dimensions
+ *
+ * input parameters:
+ *   ptdim - the quetzal_ptdim for which the number
+ *           of dimensions is required
+ *
+ * return: 0 (success) / -1 (failure)
+ */
+int
+quetzal_num_ptdim (p_offset_t * offset, quetzal_ptdim * ptdim) {
+	quetzal_ptdim p = ptdim;
+	p_offset_t    i = 0;
+	unsigned int  j = 0;
 
-	if (NULL == left || NULL == right) return sum;
-	for ( diml = left->dims, dimr = right->dims
+	if (NULL == offset || NULL == ptdim)
+		return -1;
+	while (NULL != p->next) {
+		i += DIM_CACHE;
+		p = p->next;
+	}
+	for (j = 0; j < p->max; j++)
+		i++;  /* lint does not complain this way */
+	*offset = i;
+	return 0;
+}
+
+/**
+ * quetzal_next_ptdim - moves to the next dimension value
+ *
+ * output parameters (value undefined if execution failed):
+ *   value - if not NULL will be set to the value
+ *           in the next dimension
+ *   ptdim - will be set to the structure where the next
+ *           dimension resides
+ *   offset - will be set to the offset in the structure
+ *
+ * Either `ptdim' or `offset' will change every time this
+ * function is called.  It shall be called with the same
+ * parameters to iterate through all records.  When called
+ * after the last record the function will return
+ * QUETZAL_STREND.
+ *
+ * return:  0              (success)
+ *         -1              (failure)
+ *         QUETZAL_STREND  (no more dimensions)
+ */
+int
+quetzal_next_ptdim ( dim_prec_t    * value  /* possibly NULL */
+		   , quetzal_ptdim * ptdim
+		   , p_offset_t    * offset) {
+	if (NULL == ptdim || NULL == offset)
+		return -1;
+	if (NULL == ptdim->next && ptdim->max <= *offset)
+		return QUETZAL_STREND;
+	if (DIM_CACHE <= *offset + 1) {
+		ptdim  = ptdim->next;
+		*offset = 0;
+	}
+	else {
+		*offset += 1;
+	}
+	if (NULL != value)
+		*value = ptdim->position[offset];
+	return 0;
+}
+
+/* TODO finished here */
+/* TODO, need to work on allocating and adding new dims from the public API */
+
+dim_prec_t
+quetzal_ptdim_at (quetzal_ptdim * ptdim, p_offset_t offset) {
+	quetzal_ptdim * p = ptdim;
+
+	while (offset > DIM_CACHE) {
+		p = p->next;
+		offset %= DIM_CACHE;
+	}
+	if (NULL == p)
+		return NULL;  /* something went very wrong */
+	return p->position[offset];
+}
+
+static dim_prec_t
+distance (quetzal_ptdim * left, quetzal_ptdim * right) {
+	quetzal_ptdim * diml = left;
+	quetzal_ptdim * dimr = right;
+	p_offset_t      offl = 0;
+	p_offset_t      offr = 0;
+	dim_prec_t      rawl = 0.0;
+	dim_prec_t      rawr = 0.0;
+	dim_prec_t       sum = 0.0;
+
+	if (NULL == diml || NULL == dimr)
+		return 0.0;
+	for ( rawl = diml->position[offset], rawl = dimr->position[offset]
+	    ; 
+	quetzal_next_ptdim (diml, &offl);
+	quetzal_next_ptdim (dimr, &offr);
+	/*for ( diml = left, dimr = right
 	    ; NULL != diml && NULL != dimr
 	    ; diml = diml->next, dimr = dimr->next
-	    ) {
+	    ) {*/
 		raw =  diml->position - dimr->position;
 		sum += raw*raw;
 	}

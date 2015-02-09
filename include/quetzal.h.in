@@ -1,0 +1,26 @@
+/*
+ * COPYRIGHT (C) 2015 Michal Grochmal
+ *
+ * This file is distributed under the term of the GNU GPL v3
+ */
+
+#ifndef __QUETZAL_H
+#define __QUETZAL_H
+
+#include <stdint.h>
+
+#define p_offset_t @POINT_OFFSET_TYPE@
+#define dim_prec_t @DIM_PRECISION@
+
+struct quetzal_class_str;
+struct quetzal_point_str;
+struct quetzal_pdims_str;
+typedef struct quetzal_class_str quetzal_class;
+typedef struct quetzal_point_str quetzal_point;
+typedef struct quetzal_pdims_str quetzal_pdims;
+
+/* exit codes */
+#define QUETZAL_STREND 1
+
+#endif  /* __QUETZAL_H */
+
